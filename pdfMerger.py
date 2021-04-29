@@ -5,6 +5,12 @@ import os
 import sys
 
 
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: ./pdfMerger.py <directory>")
+        exit(1)
+
+    bookDir = pathFileParse(sys.argv[1])
 
 
 # given book directory, parse the following
@@ -32,7 +38,7 @@ def pathFileParse(arg):
     # prep return dictionary
     retDict = {}
 
-    # check if dir contains "cover.pdf", "even.pdf", "odd.odf"
+    # check if dir contains "odd.pdf", "even.pdf", "cover.odf"
     oddExistCheck = False
     evenExistCheck = False
     coverExistCheck = False
@@ -48,29 +54,31 @@ def pathFileParse(arg):
 
         if evenExistCheck == False and f.startswith("even"):
             evenExistCheck = True
-
+            path = bookDir + "/" + f
+            if f == "even.pdf":
+                evenTup = (path, False)
+            else:
+                evenTup = (path, True)
 
         if coverExistCheck == False and f.startswith("cover"):
             coverExistCheck = True
+            path = bookDir + "/" + f
+            if f == "cover.pdf":
+                coverTup = (path, False)
+            else:
+                coverTup = (path, True)
 
     if oddExistCheck == False or evenExistCheck == False or coverExistCheck == False:
         print("Supplied directory does not contain all required files or have been misnamed")
+
+    retDict["odd"] = oddTup
+    retDict["even"] = evenTup
+    retDict["cover"] = coverTup
     
-    else:
-        print("everything is fine")
+    for k in retDict:
+        print("{}:\t{}".format(k, str(retDict[k])))
 
-
-    return bookDir
-
-
-
-def main():
-    if len(sys.argv) != 2:
-        print("Usage: ./pdfMerger.py <directory>")
-        exit(1)
-
-    bookDir = pathFileParse(sys.argv[1])
-
+    return retDict
 
 
 
