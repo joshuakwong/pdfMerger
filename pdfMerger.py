@@ -128,7 +128,7 @@ def checkPdfLen(keyInfo):
 # outpdfName: "<dirname.pdf>"
 # }
 def pathFileParse(arg):
-    debug(BOLD, "current book: {}".format(arg))
+    debug(BOLD, "current book: {}".format(unCamelCase(arg)))
     bookDir = os.path.abspath(arg)
     fileList = [f for f in os.listdir(bookDir) if f.endswith("pdf")]
     
@@ -182,11 +182,20 @@ def pathFileParse(arg):
     keyInfo["even"] = evenTup
     keyInfo["cover"] = coverTup
     keyInfo["baseDir"] = bookDir
-    keyInfo["outPDF"] = arg.replace("./", "") + ".pdf"
+    keyInfo["outPDF"] = unCamelCase(arg.replace("./", "")) + ".pdf"
     
     debug(INFO, keyInfo)
 
     return keyInfo
+
+
+# un-camelCase a string so that it's easier for humans to read
+def unCamelCase(string):
+    string = re.sub(r"([A-Z])", r" \1", string)
+    string = re.sub(r"([0-9]+)", r" \1", string)
+    string = string.title()
+
+    return string
 
 
 def debug(mType, msg):
