@@ -3,6 +3,10 @@
 from PyPDF2 import PdfFileReader, PdfFileWriter
 import os
 import sys
+import re
+
+# PyPDF2 documentation
+# https://pythonhosted.org/PyPDF2/
 
 INFO = 0
 SUCCESS = 1
@@ -22,7 +26,7 @@ def main():
 
     keyInfo = pathFileParse(sys.argv[1])
     pdfOperation(keyInfo)
-    debug(SUCCESS, "TERMINATING")
+    debug(SUCCESS, "EXITING PEACEFULLY")
 
 
 # given a pdf info Tuple
@@ -52,10 +56,14 @@ def pdfReadToGenericList(pdfTup):
 # - front cover
 # - interleaved odd and even pages
 # - back cover
+# save the final pdf in ./output/
 def pdfOperation(keyInfo):
-    outPDF = open(keyInfo["baseDir"] + "/" + keyInfo["outPDF"], "wb")
+    baseDir = keyInfo["baseDir"]
+    outputDir = baseDir[:baseDir.rfind("/")+1] + "output/"
+    outPDF = open(outputDir + keyInfo["outPDF"], "wb")
     pdfWriter = PdfFileWriter()
 
+    # read pdf pages into generic python lists, reverse if necessary
     oddList = pdfReadToGenericList(keyInfo["odd"])
     debug(INFO, "parsed odd pages file")
     evenList = pdfReadToGenericList(keyInfo["even"])
@@ -63,6 +71,9 @@ def pdfOperation(keyInfo):
     coverList = pdfReadToGenericList(keyInfo["cover"])
     debug(INFO, "parsed cover pages file")
 
+    # interleave odd number pages and even number pages
+    # add front cover, then interleaved odd and even pages, finally back cover
+    # write to final pdf
     oddEven = [p for pair in zip(oddList, evenList) for p in pair]
     debug(INFO, "interlaced odd and even pages")
     pdfWriter.addPage(coverList[0])
@@ -71,14 +82,34 @@ def pdfOperation(keyInfo):
     pdfWriter.addPage(coverList[1])
     pdfWriter.write(outPDF)
     
+    # size check, if pdf file has 0 bytes then something is wrong, or it is in testing mode
     size = outPDF.tell()
     if size == 0:
         outPDF.close()
-        os.remove(keyInfo["baseDir"] + "/" + keyInfo["outPDF"])
+        os.remove(outputDir + keyInfo["outPDF"])
+        debug(WARNING, "final PDF is 0 bytes, please check")
     else: 
         outPDF.close()
-        debug(SUCCESS, "final PDF written to disk")
+        debug(SUCCESS, "final PDF passed size check")
+
+    # page number check, if len of 3 files combined is less than list, then something is wrong
+    lenFromList = len(oddEven) + 2
+    sumPdfLen = checkPdfLen(keyInfo)
+    if lenFromList == sumPdfLen:
+        debug(SUCCESS, "final PDF page num check, 3 files combined= {}, listLen+2= {}".format(sumPdfLen, lenFromList))
+    else:
+        debug(WARNING, "final PDF len mismatch, please check")
+        exit(1)
     
+
+# Sum all pdf len to get the correct final pdf len.
+def checkPdfLen(keyInfo):
+    oddPdfObj = keyInfo["odd"][0]
+    evenPdfObj = keyInfo["even"][0]
+    coverPdfObj = keyInfo["cover"][0]
+
+    sumPdfLen = oddPdfObj.getNumPages() + evenPdfObj.getNumPages() + coverPdfObj.getNumPages()
+    return sumPdfLen
 
 
 # given book directory, parse the following
