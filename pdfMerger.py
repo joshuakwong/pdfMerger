@@ -21,10 +21,12 @@ def main():
 
     i = 1
     while i < len(sys.argv):
+        print()
+        print("============================================")
         print("<<<<<<<<<<<<<<<              >>>>>>>>>>>>>>>")
         print("<<<<<<<<<<<<<<< pdfMerger.py >>>>>>>>>>>>>>>")
         print("<<<<<<<<<<<<<<<              >>>>>>>>>>>>>>>")
-        print()
+        print("============================================")
 
         keyInfo = pathFileParse(sys.argv[i])
         pdfOperation(keyInfo)
@@ -91,7 +93,7 @@ def interleaveList(first, second, cover):
 
     else:
         pagesList.insert(0, cover[0])
-        if cover[1] != None:
+        if len(cover) == 2:
             pagesList.append(cover[1])
         if len(pagesList) != lenFirst + lenSecond + len(cover):
             debug(WARNING, "interleave list error, lenght mismatch")
