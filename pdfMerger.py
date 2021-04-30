@@ -15,17 +15,20 @@ BOLD = 3
 DEBUG = True
 
 def main():
-    print("<<<<<<<<<<<<<<<              >>>>>>>>>>>>>>>")
-    print("<<<<<<<<<<<<<<< pdfMerger.py >>>>>>>>>>>>>>>")
-    print("<<<<<<<<<<<<<<<              >>>>>>>>>>>>>>>")
-    print()
-
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         debug(WARNING, "Usage: ./pdfMerger.py <directory>")
         exit(1)
 
-    keyInfo = pathFileParse(sys.argv[1])
-    pdfOperation(keyInfo)
+    i = 1
+    while i < len(sys.argv):
+        print("<<<<<<<<<<<<<<<              >>>>>>>>>>>>>>>")
+        print("<<<<<<<<<<<<<<< pdfMerger.py >>>>>>>>>>>>>>>")
+        print("<<<<<<<<<<<<<<<              >>>>>>>>>>>>>>>")
+        print()
+
+        keyInfo = pathFileParse(sys.argv[i])
+        pdfOperation(keyInfo)
+        i += 1
 
 
 # given a pdf info Tuple
@@ -88,7 +91,8 @@ def interleaveList(first, second, cover):
 
     else:
         pagesList.insert(0, cover[0])
-        pagesList.append(cover[1])
+        if cover[1] != None:
+            pagesList.append(cover[1])
         if len(pagesList) != lenFirst + lenSecond + len(cover):
             debug(WARNING, "interleave list error, lenght mismatch")
 
