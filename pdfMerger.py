@@ -61,51 +61,51 @@ def pdfReadToGenericList(pdfTup):
     return pdfGenList
 
 
-def interleaveList(first, second, cover):
-    lenFirst = len(first)
-    lenSecond = len(second)
-    if lenFirst < lenSecond:
-        debug(WARNING, "cannot interleave supplied list, len(first) < len(second)")
-        debug(WARNING, "len(first)= {}, len(second)= {}".format(lenFirst, lenSecond))
+def interleaveList(a, b, cover):
+    lenA= len(a)
+    lenB= len(b)
+    if lenA < lenB:
+        debug(WARNING, "cannot interleave supplied list, len(a) < len(b)")
+        debug(WARNING, "len(a)= {}, len(b)= {}".format(lenA, lenB))
 
-    if lenFirst-lenSecond > 1:
-        debug(WARNING, "cannot interleave supplied list, len(first) is longer than len(second)")
-        debug(WARNING, "len(first)= {}, len(second)= {}, difference= {}".format(lenFirst, lenSecond, lenFirst-lenSecond))
+    if lenA-lenB > 1:
+        debug(WARNING, "cannot interleave supplied list, len(a) is longer than len(b)")
+        debug(WARNING, "len(a)= {}, len(b)= {}, difference= {}".format(lenA, lenB, lenA-lenB))
 
 
     # home brew interleaving
     pagesList = []
-    debug(INFO, "interleave odd and even pages")
+    debug(INFO, "interleave a and b pages")
 
     iF = 0
     iS = 0
-    while iF < lenFirst or iS < lenSecond:
-        if iF < lenFirst:
-            pagesList.append(first[iF])
+    while iF < lenA or iS < lenB:
+        if iF < lenA:
+            pagesList.append(a[iF])
             iF += 1
-        if iS < lenSecond:
-            pagesList.append(second[iS])
+        if iS < lenB:
+            pagesList.append(b[iS])
             iS += 1
 
     if cover == None:
-        if len(pagesList) != lenFirst + lenSecond:
+        if len(pagesList) != lenA + lenB:
             debug(WARNING, "interleave list error, lenght mismatch")
 
     else:
         pagesList.insert(0, cover[0])
         if len(cover) == 2:
             pagesList.append(cover[1])
-        if len(pagesList) != lenFirst + lenSecond + len(cover):
+        if len(pagesList) != lenA + lenB + len(cover):
             debug(WARNING, "interleave list error, lenght mismatch")
 
     return pagesList
 
 
 # pass pdf info Tuples to pdfReadToGenericList(pdfTup) and take the returned generic python list
-# interleave odd and even page list, i.e. [odd1, even 1, odd2, even2, odd3, even3...]
+# interleave a and b page list, i.e. [a1, b 1, a2, b2, a3, b3...]
 # add pdf pages to pdfWriter in the following order:
 # - front cover
-# - interleaved odd and even pages
+# - interleaved a and b pages
 # - back cover
 # save the final pdf in ./output/
 def pdfOperation(keyInfo):
@@ -115,16 +115,16 @@ def pdfOperation(keyInfo):
     pdfWriter = PdfFileWriter()
 
     # read pdf pages into generic python lists, reverse if necessary
-    oddList = pdfReadToGenericList(keyInfo["odd"])
-    debug(INFO, "parsed odd pages file")
-    evenList = pdfReadToGenericList(keyInfo["even"])
-    debug(INFO, "parsed even pages file")
+    aList = pdfReadToGenericList(keyInfo["a"])
+    debug(INFO, "parsed a pages file")
+    bList = pdfReadToGenericList(keyInfo["b"])
+    debug(INFO, "parsed b pages file")
     coverList = pdfReadToGenericList(keyInfo["cover"])
     debug(INFO, "parsed cover pages file")
 
-    # interleave odd number pages and even number pages
+    # interleave a number pages and b number pages
     # write to final pdf
-    for page in interleaveList(oddList, evenList, coverList):
+    for page in interleaveList(aList, bList, coverList):
         pdfWriter.addPage(page)
 
     pdfWriter.write(outPDF)
@@ -141,11 +141,11 @@ def pdfOperation(keyInfo):
 
 
 def getAllPdfLen(keyInfo):
-    oddPdfObj = keyInfo["odd"][0]
-    evenPdfObj = keyInfo["even"][0]
+    aPdfObj = keyInfo["a"][0]
+    bPdfObj = keyInfo["b"][0]
     coverPdfObj = keyInfo["cover"][0]
 
-    return (oddPdfObj.getNumPages(), evenPdfObj.getNumPages(), coverPdfObj.getNumPages())
+    return (aPdfObj.getNumPages(), bPdfObj.getNumPages(), coverPdfObj.getNumPages())
 
 # Sum all pdf len to get the correct final pdf len.
 def checkPdfLen(keyInfo):
@@ -156,15 +156,15 @@ def checkPdfLen(keyInfo):
 
 # given book directory, parse the following
 # - baseDir, which will become pdf name
-# - PdfFileReader obj of odd page pdf
-# - PdfFileReader obj of even page pdf
+# - PdfFileReader obj of a page pdf
+# - PdfFileReader obj of b page pdf
 # - PdfFileReader obj of cover page pdf
 # This func returns a dict with category as key, tuple or string as value. 
 # First val in tuple is PdfFileReader obj of pdf. 
 # Second val is whether pdf needs to be reversed
 # {
-# odd: (<PdfFileReader obj>, <True/False>),
-# even: (<PdfFileReader obj>, <True/False>),
+# a: (<PdfFileReader obj>, <True/False>),
+# b: (<PdfFileReader obj>, <True/False>),
 # cover: (<PdfFileReader obj>, <True/False>),
 # baseDir: "<baseDir>"
 # outpdfName: "<dirname.pdf>"
@@ -180,29 +180,29 @@ def pathFileParse(arg):
         debug(WARNING, "supplied directory does not contain 2 or 3 files")
         exit(1)
 
-    # check if dir contains "odd.pdf", "even.pdf", "cover.odf"
-    oddExistCheck = False
-    evenExistCheck = False
+    # check if dir contains "a.pdf", "b.pdf", "cover.odf"
+    aExistCheck = False
+    bExistCheck = False
     coverExistCheck = False
 
     for f in fileList:
-        if oddExistCheck == False and f.startswith("odd"):
-            oddExistCheck = True
+        if aExistCheck == False and f.startswith("a"):
+            aExistCheck = True
             path = bookDir + "/" + f
             pdfObj = PdfFileReader(path)
-            if f == "odd.pdf":
-                oddTup = (pdfObj, False)
+            if f == "a.pdf":
+                aTup = (pdfObj, False)
             else:
-                oddTup = (pdfObj, True)
+                aTup = (pdfObj, True)
 
-        if evenExistCheck == False and f.startswith("even"):
-            evenExistCheck = True
+        if bExistCheck == False and f.startswith("b"):
+            bExistCheck = True
             path = bookDir + "/" + f
             pdfObj = PdfFileReader(path)
-            if f == "even.pdf":
-                evenTup = (pdfObj, False)
+            if f == "b.pdf":
+                bTup = (pdfObj, False)
             else:
-                evenTup = (pdfObj, True)
+                bTup = (pdfObj, True)
 
         # only check for cover if there are 3 files in dir, e.g. Answer key booklet
         if (len(fileList) == 3) and coverExistCheck == False and f.startswith("cover"):
@@ -215,12 +215,12 @@ def pathFileParse(arg):
                 coverTup = (pdfObj, True)
 
     # case with 2 files in dir
-    if (len(fileList) == 2) and (oddExistCheck == False or evenExistCheck == False):
+    if (len(fileList) == 2) and (aExistCheck == False or bExistCheck == False):
         debug(WARNING, "Supplied directory has 2 files, does not contain req files have been misnamed")
         exit(1)
 
     # case with 3 files in dir
-    if (len(fileList) == 3) and (oddExistCheck == False or evenExistCheck == False or coverExistCheck == False):
+    if (len(fileList) == 3) and (aExistCheck == False or bExistCheck == False or coverExistCheck == False):
         debug(WARNING, "Supplied directory has 3 files, does not contain req files have been misnamed")
         exit(1)
 
@@ -232,8 +232,8 @@ def pathFileParse(arg):
 
     # prep return dictionary
     keyInfo = {}
-    keyInfo["odd"] = oddTup
-    keyInfo["even"] = evenTup
+    keyInfo["a"] = aTup
+    keyInfo["b"] = bTup
     keyInfo["cover"] = coverTup
     keyInfo["baseDir"] = bookDir
     keyInfo["outPDF"] = unCamelCase(arg.replace("./", "")) + ".pdf"
