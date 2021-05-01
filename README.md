@@ -24,16 +24,18 @@ For example
 ```
 a.pdf = ['p1', 'p3', 'p5', 'p7', 'p9']
 b-r.pdf = ['p10', 'p8', 'p6', 'p4', 'p2']
+cover.pdf = ['c0', 'c1']
 
-merged=['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10']
+merged=['c0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'c1']
 ```
 
 Another example
 ```
 a-r.pdf = ['p9', 'p7', 'p5', 'p3', 'p1']
 b-r.pdf = ['p10', 'p8', 'p6', 'p4', 'p2']
+cover.pdf = ['c0']      # if there is only front cover and no back cover
 
-merged=['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10']
+merged=['c0', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10']
 ```
 
 ### error?
