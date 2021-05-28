@@ -247,6 +247,8 @@ def pathFileParse(arg):
 def unCamelCase(string):
     string = re.sub(r"([A-Z])", r" \1", string)
     string = re.sub(r"([0-9]+)", r" \1", string)
+    string = re.sub(r"(\&)", r" \1", string)
+    string = re.sub(r"(\-)", r" \1", string)
     string = string.title()
 
     return string
